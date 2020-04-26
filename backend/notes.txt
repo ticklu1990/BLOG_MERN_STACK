@@ -1,0 +1,366 @@
+1.npm init -y => (-y) gives the [default packages] with this [command].
+
+2.npm install 
+   express 
+   mongoose => talk with mongoDB. 
+   
+   #help pass JSON data from the request body.
+   #will be sending request from the front-end to the backend.
+   #give us the JSON data.
+
+   body-parser =>     
+   cookie-parser =>
+   
+   #helps see endpoints in the terminal
+   #when requests are coming from the front end[client side] to the backend.
+
+   morgan 
+
+   #to continously run our nodejs server.
+
+   nodemon
+
+   #access to the environment varibles.
+
+   .env
+
+   #so that our API is accessible to the front-end client.
+   #otherwise you will get errors like cors origin request errors.
+   cors
+
+   =>npm install express mongoose body-parser cookie-parser morgan nodemon cors dotenv
+
+
+#node_modules included in gitignore to not include in github.
+
+#will change accordingly to the development and production NODE_ENV and also CLIENT_URL 
+when it is pushed to the live server.
+
+require('dotenv').config(); => load env variables.
+
+#create app:
+#express app availiable in this app [variable].
+// app
+const app = express();
+
+#app uses [middlewares] using the [use] method:
+
+# [middlewares] :
+
+#app.use(morgan('dev'));=> arguments given in morgan[middlewares] as 
+'dev' gives us the [endpoints] in the [development] console.
+#app.use(bodyParser.json());
+#app.use(cookieParser());
+#app.use(cors());
+#routes:server requests to /api it will give the [time format].
+
+app.get('/api', (req, res) => {
+    res.json({ time: Date().toString() });
+});
+
+#[env] accessed using the require ('dotenv').config() or value declared as 8000.
+
+#routes:
+ app.get('/api', (req, res) => {
+    res.json({ time: Date().toString() });
+});
+
+#port:
+const port = process.env.PORT || 8000;
+
+#can be left just like that: 
+app.listen(port)
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
+[changes] in package.json:
+
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1" [=>]  "start" : "nodemon server.js "
+  },
+
+=> npm start.
+
+LOGS:ERROR
+dotenv file not found.
+npm install dotenv
+
+http://localhost:8000/api
+
+{"time":"Fri Apr 17 2020 11:52:43 GMT+0530 (India Standard Time)"}
+
+install POSTMAN: send request to our API.
+
+
+Applied cors but havnt passed any configuration:
+
+In development we will be running our port in 8000 which is a different origin
+and our client will be running in port 3000 which is a differnt origin.
+
+So.when we make a request from our client side to our server side.
+you will see some kind of error in the browsers.Its called cors error.
+
+[No-Access-Control-Allow-origin]
+
+So client side is running on different port and your browser is running on different port.
+Some browsers by default do not allow such access for security reasons.
+
+// cors: to avoid cors errors we can put a small check.only for browser to browser communication:
+if (process.env.NODE_ENV === 'development') {
+    app.use(cors({ origin: `${process.env.CLIENT_URL}` }));
+}
+
+Doesn't has any effect on Postman.
+
+Connecting nodejs API with MongoDB:
+
+https://cloud.mongodb.com/v2/5d0a1a50a6f23972527a0dbd#security/network/whitelist
+
+user:ticklu1990
+pswd:transform_ticklu@1990
+
+DATABASE_CLOUD = 'mongodb+srv://ticklu1990:transform_ticklu@1990@cluster0-bsr4j.mongodb.net/test?retryWrites=true&w=majority'
+DATABASE_LOCAL = 'mongodb://localhost:27017/seoblog'
+
+// db
+mongoose
+    .connect(process.env.DATABASE_LOCAL, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false })
+    .then(() => console.log('DB connected'));
+
+#separating routes:
+
+const express = require('express');
+const router = express.Router();
+
+router.get('/', (req, res) => {
+    res.json({ time: Date().toString() });
+});
+
+#to use this router in server.js
+module.exports = router;
+
+// bring routes
+const blogRoutes = require('./routes/blog');
+
+
+#all of them will have api's prefixed.
+// routes middleware
+app.use('/api', blogRoutes);
+
+
+#authentication system:
+username: {
+            type: String,
+            trim: true,
+            //If you add { type: String, trim: true } to a field in your schema, 
+            //then trying to save strings like "  hello", or "hello ", or "  hello ",would end up being saved as "hello"
+            required: true,
+            max: 32,
+            unique: true,
+            index: true,
+            lowercase: true
+        },
+
+        #photo: {
+            data: Buffer,
+            contentType: String
+        },//save photo in binary data format.
+          //mongodb is perfect for saving binary data.
+          //string: image/jpg.
+
+          resetPasswordLink: {
+            data: String,
+            default: ''
+        } //generate a token and save in the database.
+          //email that token to the database.
+          //email that token to the user.
+          //when they click on that link they will be redirected to that react application
+          //and from there react app will send the token back to our server.
+          //then we are going to check if that token is exactly the one we have in the database.
+    # timestamp will be kept as 2nd argument.
+    
+     ,{ timestamp: true }
+
+     Add Content Type in [Postman] =>  <calculated when request is sent>
+
+     You will need to install few more npm packages in the following lecture. Please copy the following code:
+
+     npm i express-validator => validation
+           
+           jsonwebtoken => send that to our Client whether its [Postman] or [React]. 
+           
+           express-jwt => generated token is still valid or not.
+           
+           formidable => recieve form data from the client side to the server side,that is different than JSON data type.
+           
+           lodash => use helper methods from lodash library.
+           #few more packages for saving our data in the database.
+           #packages used to create a new blog.
+           
+           slugify => create slug [https://www.udemy.com/course/react-node-nextjs-fullstack-multi-user]
+           
+           string-strip-html => this few lines are extracted from the blog body automatically saved in the [database].
+           as a [meta-description].
+
+           =>required for search engine optimization
+
+
+          #Create a [Validator]:
+
+         const { check } = require('express-validator');
+
+         exports.userSignupValidator = [
+           check('name')
+             .not()
+             .isEmpty()
+             .withMessage('Name is required'),
+
+           check('email')
+            .isEmail()
+            .withMessage('Must be a valid email address'),
+
+           check('password')
+            .isLength({ min: 6 })
+            .withMessage('Password must be at least 6 characters long')
+         ];
+         messages will be send as error.
+         write here in the index.
+
+         We need to hash the password before we save in the database.
+         User with the same name doesnt already exist in the database.
+         Make some changes before we save the user in the database.
+
+         https://www.udemy.com/course/react-node-nextjs-fullstack-multi-user-blogging-platform-with-seo/learn/lecture/16312684#questions
+         
+
+        const { validationResult } = require('express-validator');
+         
+        #next is a callback function: 
+
+        exports.runValidation = (req, res, next) => {
+
+        #getting the [request] in the [name,email and password] in the request(req)
+
+        const errors = validationResult(req);
+
+        #!error means error is there:
+
+        if (!errors.isEmpty()) {
+
+           #loop through the [errors] which can be very annoying.
+           #as soon as there is error we give that [error].
+           #the very first one and then we say msg.
+           #status code 422 unprocessable entity.
+
+           return res.status(422).json({ error: errors.array()[0].msg});
+        }
+        #callback next() so that our application doesnt get hault.
+        next();
+        };  
+        #write a middleware.  
+  
+      # routes/index.js:
+        
+      const express = require('express');
+      const router = express.Router();
+      const { signup } = require('../controllers/auth');
+
+      // validators
+
+     const { runValidation } = require('../validators');//since its a index file we dont need to mention any path.
+     const { userSignupValidator } = require('../validators/auth');
+
+     #sequence of validation:
+     router.post('/signup', userSignupValidator, runValidation, signup);
+
+     module.exports = router; 
+        
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+  
+         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.use(cors());
+
+
+
+
+
+
+
+
